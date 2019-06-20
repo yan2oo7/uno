@@ -535,8 +535,11 @@ namespace Windows.UI.Xaml.Controls
 			{
 				//1. Layout header at start
 				frame.Size = oldHeaderSize ?? GetHeaderSize();
-				//Give the maximum breadth available, since for now we don't adjust the measured width of the list based on the databound item
-				SetBreadth(ref frame, availableBreadth);
+				if (ShouldBreadthStretch)
+				{
+					//We are stretched, give the maximum breadth available
+					SetBreadth(ref frame, availableBreadth);
+				}
 				if (createLayoutInfo)
 				{
 					CreateSupplementaryElementLayoutInfo(0, 0, NativeListViewBase.ListViewHeaderElementKindNS, frame);
@@ -563,9 +566,9 @@ namespace Windows.UI.Xaml.Controls
 
 					//a. Layout group header, if present
 					frame.Size = oldGroupHeaderSizes?.UnoGetValueOrDefault(section) ?? GetSectionHeaderSize(section);
-					if (RelativeGroupHeaderPlacement != RelativeHeaderPlacement.Adjacent)
+					if (RelativeGroupHeaderPlacement != RelativeHeaderPlacement.Adjacent && ShouldBreadthStretch)
 					{
-						//Give the maximum breadth available, since for now we don't adjust the measured width of the list based on the databound item
+						//We are stretched, give the maximum breadth available
 						SetBreadth(ref frame, availableBreadth);
 					}
 
@@ -623,8 +626,11 @@ namespace Windows.UI.Xaml.Controls
 			{
 				//3. Layout footer 
 				frame.Size = oldFooterSize ?? GetFooterSize();
-				//Give the maximum breadth available, since for now we don't adjust the measured width of the list based on the databound item
-				SetBreadth(ref frame, availableBreadth);
+				if (ShouldBreadthStretch)
+				{
+					//We are stretched, give the maximum breadth available
+					SetBreadth(ref frame, availableBreadth);
+				}
 				if (createLayoutInfo)
 				{
 					CreateSupplementaryElementLayoutInfo(0, 0, NativeListViewBase.ListViewFooterElementKindNS, frame);
