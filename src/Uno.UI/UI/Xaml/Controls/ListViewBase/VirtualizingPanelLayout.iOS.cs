@@ -596,7 +596,7 @@ namespace Windows.UI.Xaml.Controls
 					_itemLayoutInfos[section] = new Dictionary<NSIndexPath, UICollectionViewLayoutAttributes>(); 
 				}
 				//b. Layout items in group
-				var itemsBreadth = LayoutItemsInGroup(section, availableGroupBreadth, ref frame, createLayoutInfo, oldItemSizes);
+				var itemsBreadth = LayoutItemsInGroup(section, availableGroupBreadth, GetExtent(size), ref frame, createLayoutInfo, oldItemSizes);
 				var groupBreadth = itemsBreadth;
 				if (RelativeGroupHeaderPlacement == RelativeHeaderPlacement.Adjacent)
 				{
@@ -720,7 +720,7 @@ namespace Windows.UI.Xaml.Controls
 		/// <param name="createLayoutInfo">Should we create <see cref="UICollectionViewLayoutAttributes"/>?</param>
 		/// <param name="oldItemSizes">If this is a layout in response to an INotifyCollectionChanged operation, this will contain the old item sizes for reuse; otherwise it will be null.</param>
 		/// <returns>The measured breadth of this group.</returns>
-		protected abstract nfloat LayoutItemsInGroup(int group, nfloat availableBreadth, ref CGRect frame, bool createLayoutInfo, Dictionary<NSIndexPath, CGSize?> oldItemSizes);
+		protected abstract nfloat LayoutItemsInGroup(int group, nfloat availableBreadth, nfloat availableExtent, ref CGRect frame, bool createLayoutInfo, Dictionary<NSIndexPath, CGSize?> oldItemSizes);
 
 		private void CreateSupplementaryElementLayoutInfo(int row, int section, NSString kind, CGRect frame)
 		{
@@ -872,9 +872,18 @@ namespace Windows.UI.Xaml.Controls
 			}
 		}
 
-		protected CGSize GetItemSizeForIndexPath(NSIndexPath indexPath)
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="indexPath"></param>
+		/// <param name="isInView"></param>
+		/// <returns></returns>
+		protected CGSize GetItemSizeForIndexPath(NSIndexPath indexPath, bool isInView, nfloat availableBreadth)
 		{
-			return Source.GetTarget()?.GetItemSize(CollectionView, indexPath) ?? CGSize.Empty;
+			var availableSize = CGSize.Empty;
+			SetBreadth(ref availableSize, availableBreadth);
+			SetExtent(ref availableSize, nfloat.PositiveInfinity);
+			return Source.GetTarget()?.GetItemSize(CollectionView, indexPath, isInView, availableSize) ?? CGSize.Empty;
 		}
 
 		private CGSize GetHeaderSize()
@@ -1448,7 +1457,7 @@ namespace Windows.UI.Xaml.Controls
 			}
 		}
 
-		private nfloat GetExtent(CGSize size)
+		protected nfloat GetExtent(CGSize size)
 		{
 			if (ScrollOrientation == Orientation.Vertical)
 			{
@@ -1460,7 +1469,7 @@ namespace Windows.UI.Xaml.Controls
 			}
 		}
 
-		private nfloat GetExtent(CGPoint point)
+		protected nfloat GetExtent(CGPoint point)
 		{
 			if (ScrollOrientation == Orientation.Vertical)
 			{
@@ -1529,6 +1538,18 @@ namespace Windows.UI.Xaml.Controls
 			else
 			{
 				frame.Height = breadth;
+			}
+		}
+
+		protected void SetBreadth(ref CGSize size, nfloat breadth)
+		{
+			if (ScrollOrientation == Orientation.Vertical)
+			{
+				size.Width = breadth;
+			}
+			else
+			{
+				size.Height = breadth;
 			}
 		}
 

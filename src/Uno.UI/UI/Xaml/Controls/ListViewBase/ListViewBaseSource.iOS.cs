@@ -213,14 +213,23 @@ namespace Windows.UI.Xaml.Controls
 
 				using (cell.InterceptSetNeedsLayout())
 				{
+					if (_cachedItems.ContainsKey(indexPath))
+					{
+						cell.Content = _cachedItems[indexPath];
+						_cachedItems.Remove(indexPath);
+						// TODO: Oh so much. For starters, presumably we don't need to rebind below (PrepareContainerForIndex)
+
+						// And how are the ListViewItems going to get recycled now? There's CellDisplayingEnded - hopefully it's 'bookended' properly with GetCell...
+					}
+
 					var selectorItem = cell.Content as SelectorItem;
 
+					cell.Owner = Owner;
 					if (selectorItem == null ||
 						// If it's not a generated container then it must be an item that returned true for IsItemItsOwnContainerOverride (eg an
 						// explicitly-defined ListViewItem), and shouldn't be recycled for a different item.
 						!selectorItem.IsGeneratedContainer)
 					{
-						cell.Owner = Owner;
 						selectorItem = Owner?.XamlParent?.GetContainerForIndex(index) as SelectorItem;
 						cell.Content = selectorItem;
 						if (this.Log().IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
@@ -497,9 +506,45 @@ namespace Windows.UI.Xaml.Controls
 			return template.SelectOrDefault(ht => GetTemplateSize(ht, NativeListViewBase.ListViewSectionHeaderElementKindNS), CGSize.Empty);
 		}
 
+		private readonly Dictionary<NSIndexPath, ContentControl> _cachedItems = new Dictionary<NSIndexPath, ContentControl>(); //TODO: amongst other things, handle collection changes
 
-		public virtual CGSize GetItemSize(UICollectionView collectionView, NSIndexPath indexPath)
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="collectionView"></param>
+		/// <param name="indexPath"></param>
+		/// <param name="isInView"></param>
+		/// <returns></returns>
+		public virtual CGSize GetItemSize(UICollectionView collectionView, NSIndexPath indexPath, bool isInView, CGSize availableSize)
 		{
+			ContentControl itemView = null;
+			if (isInView)
+			{
+				//1. Check if it's already visible
+				itemView = (collectionView.CellForItem(indexPath) as ListViewBaseInternalContainer)?.Content;
+
+				//2. Check if it's already materialized
+				if (itemView == null)
+				{
+					itemView = _cachedItems.GetValueOrDefault(indexPath);
+				}
+
+				//3. Materialize and measure it
+				if (itemView == null)
+				{
+					var index = Owner?.XamlParent?.GetIndexFromIndexPath(IndexPath.FromNSIndexPath(indexPath)) ?? -1;
+					itemView = Owner?.XamlParent?.GetContainerForIndex(index) as ContentControl;
+					FrameworkElement.InitializePhaseBinding(itemView);
+					Owner?.XamlParent?.PrepareContainerForIndex(itemView, index);
+
+					_cachedItems[indexPath] = itemView;
+
+					GetMeasuredSize(itemView, availableSize);
+				}
+
+				return itemView.DesiredSize;
+			}
+
 			DataTemplate itemTemplate = GetTemplateForItem(indexPath);
 
 			if (_currentSelector != Owner.ItemTemplateSelector)
@@ -589,34 +634,42 @@ namespace Windows.UI.Xaml.Controls
 				}
 
 				container.ContentTemplate = dataTemplate;
-				try
-				{
-					// Attach templated container to visual tree while measuring. This works around the bug that default Style is not 
-					// applied until view is loaded.
-					Owner.XamlParent.AddSubview(BlockLayout);
-					BlockLayout.AddSubview(container);
-					size = Owner.NativeLayout.Layouter.MeasureChild(container, new Size(double.MaxValue, double.MaxValue));
 
-					if ((size.Height > nfloat.MaxValue / 2 || size.Width > nfloat.MaxValue / 2) &&
-						this.Log().IsEnabled(LogLevel.Warning)
-					)
-					{
-						this.Log().LogWarning($"Infinite item size reported, this can crash {nameof(UICollectionView)}.");
-					}
-				}
-				finally
-				{
-					Owner.XamlParent.RemoveChild(BlockLayout);
-					BlockLayout.RemoveChild(container);
+				size = GetMeasuredSize(container, new Size(double.MaxValue, double.MaxValue));
 
 					// Reset the DataContext for reuse.
 					container.ClearValue(FrameworkElement.DataContextProperty);
-				}
 
 				_templateCache[dataTemplate ?? _nullDataTemplateKey] = size;
 			}
 
 			return size;
+		}
+
+		private CGSize GetMeasuredSize(ContentControl view, Size availableSize)
+		{
+			try
+			{
+				// Attach templated container to visual tree while measuring. This works around the bug that default Style is not 
+				// applied until view is loaded.
+				Owner.XamlParent.AddSubview(BlockLayout);
+				BlockLayout.AddSubview(view);
+				var size = Owner.NativeLayout.Layouter.MeasureChild(view, availableSize);
+
+				if ((size.Height > nfloat.MaxValue / 2 || size.Width > nfloat.MaxValue / 2) &&
+					this.Log().IsEnabled(LogLevel.Warning)
+				)
+				{
+					this.Log().LogWarning($"Infinite item size reported, this can crash {nameof(UICollectionView)}.");
+				}
+
+				return size;
+			}
+			finally
+			{
+				Owner.XamlParent.RemoveChild(BlockLayout);
+				BlockLayout.RemoveChild(view);
+			}
 		}
 
 		/// <summary>
@@ -787,7 +840,7 @@ namespace Windows.UI.Xaml.Controls
 				return null;
 			}
 
-			if(Content == null)
+			if (Content == null)
 			{
 				this.Log().Error("Empty ListViewBaseInternalContainer content.");
 				return null;

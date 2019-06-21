@@ -35,7 +35,7 @@ namespace Windows.UI.Xaml.Controls
 
 		public ItemsStackPanelLayout() { }
 
-		protected override nfloat LayoutItemsInGroup(int group, nfloat availableBreadth, ref CGRect frame, bool createLayoutInfo, Dictionary<NSIndexPath, CGSize?> oldItemSizes)
+		protected override nfloat LayoutItemsInGroup(int group, nfloat availableBreadth, nfloat availableExtent, ref CGRect frame, bool createLayoutInfo, Dictionary<NSIndexPath, CGSize?> oldItemSizes)
 		{
 
 			var numberOfItems = CollectionView.NumberOfItemsInSection(group);
@@ -46,7 +46,7 @@ namespace Windows.UI.Xaml.Controls
 			for (var row = 0; row < numberOfItems; ++row)
 			{
 				var indexPath = GetNSIndexPathFromRowSection(row, group);
-				frame.Size = oldItemSizes?.UnoGetValueOrDefault(indexPath) ?? GetItemSizeForIndexPath(indexPath);
+				SetFrameSizeForIndexPath(ref frame, oldItemSizes, indexPath, availableBreadth, availableExtent);
 
 				if (ShouldBreadthStretch)
 				{
@@ -65,6 +65,13 @@ namespace Windows.UI.Xaml.Controls
 				measuredBreadth = NMath.Max(measuredBreadth, GetBreadth(frame.Size));
 			}
 			return measuredBreadth;
+		}
+
+		private void SetFrameSizeForIndexPath(ref CGRect frame, Dictionary<NSIndexPath, CGSize?> oldItemSizes, NSIndexPath indexPath, nfloat availableBreadth, nfloat availableExtent)
+		{
+			var isInView = GetExtentStart(frame) >= GetExtent(CollectionView.ContentOffset) && GetExtentStart(frame) <= (GetExtent(CollectionView.ContentOffset) + availableExtent);
+			frame.Size = oldItemSizes?.UnoGetValueOrDefault(indexPath) ?? GetItemSizeForIndexPath(indexPath, isInView, availableBreadth);
+
 		}
 
 		private void SetExtentStart(ref CGRect frame, nfloat extentStart)

@@ -16,7 +16,7 @@ namespace Windows.UI.Xaml.Controls
 
 		internal override bool SupportsDynamicItemSizes => false;
 
-		protected override nfloat LayoutItemsInGroup(int group, nfloat availableBreadth, ref CGRect frame, bool createLayoutInfo, Dictionary<NSIndexPath, CGSize?> oldItemSizes)
+		protected override nfloat LayoutItemsInGroup(int group, nfloat availableBreadth, nfloat availableExtent, ref CGRect frame, bool createLayoutInfo, Dictionary<NSIndexPath, CGSize?> oldItemSizes)
 		{
 			return 0;
 		}
