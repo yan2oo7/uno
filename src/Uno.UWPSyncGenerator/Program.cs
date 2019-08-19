@@ -13,6 +13,7 @@ namespace Uno.UWPSyncGenerator
 	{
 		const string SyncMode = "sync";
 		const string DocMode = "doc";
+		const string ReportMode = "report";
 		const string AllMode = "all";
 
 		static void Main(string[] args)
@@ -45,6 +46,19 @@ namespace Uno.UWPSyncGenerator
 				docGenerator.Build(@"..\..\..\..\Uno.UI", "Uno.UI", "Windows.Foundation.UniversalApiContract");
 				docGenerator.PostProcess();
 				docGenerator.Write();
+			}
+
+			if (mode == ReportMode || mode == AllMode)
+			{
+				var docGenerator = new DocGenerator();
+				docGenerator.Initialize();
+				docGenerator.Build(@"..\..\..\..\Uno.Foundation", "Uno.Foundation", "Windows.Foundation.FoundationContract");
+				docGenerator.Build(@"..\..\..\..\Uno.UWP", "Uno", "Windows.Foundation.UniversalApiContract");
+				docGenerator.Build(@"..\..\..\..\Uno.UWP", "Uno", "Windows.Phone.PhoneContract");
+				docGenerator.Build(@"..\..\..\..\Uno.UWP", "Uno", "Windows.ApplicationModel.Calls.CallsPhoneContract");
+				docGenerator.Build(@"..\..\..\..\Uno.UI", "Uno.UI", "Windows.Foundation.UniversalApiContract");
+				docGenerator.PostProcess();
+				docGenerator.WriteWASMReport();
 			}
 		}
 	}

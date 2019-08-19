@@ -154,6 +154,18 @@ namespace Uno.UWPSyncGenerator
 			AppendLine();
 		}
 
+		public IDisposable Code(string codeType)
+		{
+			AppendLine($"```{codeType}");
+			AppendLine();
+
+			return new DisposableAction(() =>
+			{
+				AppendLine($"```");
+				AppendLine();
+			});
+		}
+
 		/// <summary>
 		/// Returns a Markdown-formatted hyperlink.
 		/// </summary>
@@ -161,5 +173,11 @@ namespace Uno.UWPSyncGenerator
 		/// <param name="linkUrl">Url to link to</param>
 		/// <returns>String in Markdown's hyperlink format</returns>
 		public static string Hyperlink(string linkText, string linkUrl) => $"[{linkText}]({linkUrl})";
+
+		public static class CodeTypes
+		{
+			public const string CSharp = "csharp";
+			public const string Xaml = "xaml";
+		}
 	}
 }
