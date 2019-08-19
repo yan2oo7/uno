@@ -378,7 +378,7 @@ namespace Uno.UWPSyncGenerator
 		{
 			var uniqueBaseTypes = AllSymbols()
 				.Where(s => s.Symbol != null)
-				.Select(s => (s.Symbol.BaseType?.Name, s.Symbol.BaseType?.ContainingNamespace.ToDisplayString()))
+				.Select(s => (ExtractBaseType(s)?.Name, ExtractBaseType(s)?.ContainingNamespace.ToDisplayString()))
 				.Distinct()
 				.ToArray();
 			if (uniqueBaseTypes.Length == 1)
@@ -425,6 +425,23 @@ namespace Uno.UWPSyncGenerator
 				yield return (view.WasmSymbol, ImplementedFor.WASM);
 				yield return (view.MacOSSymbol, ImplementedFor.MacOS);
 			}
+		}
+
+		/// <summary>
+		/// Extract the symbol's base type. In the special case of types inheriting directly from DependencyObject, return it as the base type rather than System.Object.
+		/// </summary>
+		private static INamedTypeSymbol ExtractBaseType((INamedTypeSymbol Symbol, ImplementedFor ImplementedFor) tuple)
+		{
+			if (tuple.Symbol.BaseType?.Name == "Object")
+			{
+				var dO = tuple.Symbol.Interfaces.FirstOrDefault(i => i.Name == "DependencyObject");
+				if (dO != null)
+				{
+					return dO;
+				}
+			}
+
+			return tuple.Symbol.BaseType;
 		}
 
 		private static IGrouping<INamespaceSymbol, PlatformSymbols<INamedTypeSymbol>>[] GroupByNamespace(IEnumerable<PlatformSymbols<INamedTypeSymbol>> types)
