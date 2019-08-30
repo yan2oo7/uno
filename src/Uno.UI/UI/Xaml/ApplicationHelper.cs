@@ -20,11 +20,11 @@ namespace Uno.UI
 			{
 				_requestedCustomTheme = value;
 
-				if (_requestedCustomTheme.Equals("Dark"))
+				if (_requestedCustomTheme?.Equals("Dark") ?? false)
 				{
 					Application.Current.RequestedTheme = ApplicationTheme.Dark;
 				}
-				else if (_requestedCustomTheme.Equals("Light"))
+				else if (_requestedCustomTheme?.Equals("Light") ?? false)
 				{
 					Application.Current.RequestedTheme = ApplicationTheme.Light;
 				}
