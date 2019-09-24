@@ -53,7 +53,7 @@ namespace Windows.UI.Xaml.Documents
 		}
 #endif
 
-#region FontFamily Dependency Property
+		#region FontFamily Dependency Property
 
 		public FontFamily FontFamily
 		{
@@ -80,7 +80,7 @@ namespace Windows.UI.Xaml.Documents
 
 		partial void OnFontFamilyChangedPartial();
 
-#endregion
+		#endregion
 
 		#region FontStyle Dependency Property
 
@@ -109,7 +109,7 @@ namespace Windows.UI.Xaml.Documents
 
 		partial void OnFontStyleChangedPartial();
 
-#endregion
+		#endregion
 
 		#region FontSize Dependency Property
 
@@ -138,7 +138,7 @@ namespace Windows.UI.Xaml.Documents
 
 		partial void OnFontSizeChangedPartial();
 
-#endregion
+		#endregion
 
 		#region Foreground Dependency Property
 
@@ -175,7 +175,7 @@ namespace Windows.UI.Xaml.Documents
 
 		partial void OnForegroundChangedPartial();
 
-#endregion
+		#endregion
 
 		#region Style Dependency Property
 
@@ -191,25 +191,20 @@ namespace Windows.UI.Xaml.Documents
 				typeof(Style),
 				typeof(TextElement),
 				new PropertyMetadata(
-					defaultValue: Style.DefaultStyleForType(typeof(TextElement)),
+					defaultValue: null,
 					propertyChangedCallback: (s, e) => ((TextElement)s).OnStyleChanged()
 				)
 			);
 
-		protected virtual void OnStyleChanged()
+		private void OnStyleChanged()
 		{
-			if (Style == null)
-			{
-				Style = Style.DefaultStyleForType(typeof(TextElement));
-				Style.ApplyTo(this);
-			}
 
 			OnStyleChangedPartial();
 		}
 
 		partial void OnStyleChangedPartial();
 
-#endregion
+		#endregion
 
 		#region FontWeight Dependency Property
 
@@ -238,7 +233,7 @@ namespace Windows.UI.Xaml.Documents
 
 		partial void OnFontWeightChangedPartial();
 
-#endregion
+		#endregion
 
 		#region CharacterSpacing Dependency Property
 

@@ -100,15 +100,6 @@ namespace Windows.UI.Xaml.Documents
 
 		#endregion
 
-		protected override void OnStyleChanged()
-		{
-			if (Style == null)
-			{
-				base.Style = Style.DefaultStyleForType(typeof(Hyperlink));
-				base.Style.ApplyTo(this);
-			}
-		}
-
 		#region Click
 
 		internal bool IsPressed { get; private set; }
@@ -168,6 +159,6 @@ namespace Windows.UI.Xaml.Documents
 #endif
 		}
 
-#endregion
+		#endregion
 	}
 }
