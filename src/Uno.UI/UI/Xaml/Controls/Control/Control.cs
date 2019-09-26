@@ -46,13 +46,12 @@ namespace Windows.UI.Xaml.Controls
 			SubscribeToOverridenRoutedEvents();
 			OnIsFocusableChanged();
 		}
-
-		/// <summary>
-		/// This property is not used in Uno.UI, and is always set to the current top-level type.
-		/// </summary>
+		
 		protected object DefaultStyleKey { get; set; }
 
 		protected override bool IsSimpleLayout => true;
+
+		private protected override Type GetDefaultStyleKey() => DefaultStyleKey as Type;
 
 		protected override void OnBackgroundChanged(DependencyPropertyChangedEventArgs e)
 		{
