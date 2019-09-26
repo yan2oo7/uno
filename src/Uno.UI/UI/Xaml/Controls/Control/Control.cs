@@ -45,6 +45,8 @@ namespace Windows.UI.Xaml.Controls
 		{
 			SubscribeToOverridenRoutedEvents();
 			OnIsFocusableChanged();
+
+			DefaultStyleKey = typeof(Control);
 		}
 		
 		protected object DefaultStyleKey { get; set; }
