@@ -1,10 +1,30 @@
 ﻿using System;
 using Uno;
 using Uno.Diagnostics.Eventing;
+using Uno.UI;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Metadata;
 using Windows.UI.Xaml.Controls.Primitives;
+
+#if XAMARIN_ANDROID
+using View = Android.Views.View;
+using ViewGroup = Android.Views.ViewGroup;
+using Font = Android.Graphics.Typeface;
+using Android.Graphics;
+using DependencyObject = System.Object;
+#elif XAMARIN_IOS
+using View = UIKit.UIView;
+using ViewGroup = UIKit.UIView;
+using UIKit;
+#elif __MACOS__
+using View = AppKit.NSView;
+using ViewGroup = AppKit.NSView;
+using AppKit;
+#else
+using View = Windows.UI.Xaml.UIElement;
+using ViewGroup = Windows.UI.Xaml.UIElement;
+#endif
 
 namespace Windows.UI.Xaml
 {
@@ -17,7 +37,7 @@ namespace Windows.UI.Xaml
 		{
 			public readonly static Guid Id = new Guid(
 				// {DEE07725-1CBF-4BF6-AC8A-960360CB3512}
-				unchecked ((int)0xdee07725), 0x1cbf, 0x4bf6, new byte[] { 0xac, 0x8a, 0x96, 0x3, 0x60, 0xcb, 0x35, 0x12 }
+				unchecked((int)0xdee07725), 0x1cbf, 0x4bf6, new byte[] { 0xac, 0x8a, 0x96, 0x3, 0x60, 0xcb, 0x35, 0x12 }
 			);
 
 			public const int LauchedStart = 1;
@@ -103,6 +123,49 @@ namespace Windows.UI.Xaml
 		internal void RaiseWindowCreated(Window window)
 		{
 			OnWindowCreated(new WindowCreatedEventArgs(window));
+		}
+
+		internal void SetRequestedTheme(ApplicationTheme requestedTheme)
+		{
+			if (requestedTheme != RequestedTheme)
+			{
+				RequestedTheme = requestedTheme;
+
+				OnRequestedThemeChanged();
+			}
+		}
+
+		private void OnRequestedThemeChanged()
+		{
+			if (Windows.UI.Xaml.Window.Current.Content is FrameworkElement root)
+			{
+				PropagateThemeChanged(root);
+			}
+
+			void PropagateThemeChanged(object instance)
+			{
+				// Update ThemeResource references that have changed
+				if (instance is FrameworkElement fe)
+				{
+					fe.UpdateThemeBindings();
+				}
+
+				//Try Panel.Children before ViewGroup.GetChildren - this results in fewer allocations
+				if (instance is Controls.Panel p)
+				{
+					foreach (object o in p.Children)
+					{
+						PropagateThemeChanged(o);
+					}
+				}
+				else if (instance is ViewGroup g)
+				{
+					foreach (object o in g.GetChildren())
+					{
+						PropagateThemeChanged(o);
+					}
+				}
+			}
 		}
 	}
 }
