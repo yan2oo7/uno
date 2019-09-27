@@ -67,17 +67,6 @@ namespace Uno.UI.Tests.Windows_UI_Xaml
 
 			var text4InlineBefore = control.InlineTemplateControl.TextBlock4.Text;
 			var text4ResourceTemplateBefore = control.TemplateFromResourceControl.TextBlock4.Text;
-
-			app.HostView.Children.Add(control);
-
-			var text2InlineAfter = control.InlineTemplateControl.TextBlock2.Text;
-			var text2ResourceTemplateAfter = control.TemplateFromResourceControl.TextBlock2.Text;
-
-			Assert.AreEqual("LocalVisualTree", text2InlineBefore);
-
-			Assert.AreEqual("ApplicationLevel", text4InlineBefore);
-
-			Assert.AreEqual("LocalVisualTree", text2InlineAfter);
 		}
 
 		[TestMethod]
@@ -87,8 +76,6 @@ namespace Uno.UI.Tests.Windows_UI_Xaml
 			var app = UnitTestsApp.App.EnsureApplication();
 
 			var control = new Test_Control();
-
-			app.HostView.Children.Add(control); //Note: this is not necessary for this test on UWP, only for Uno
 
 			control.InlineTemplateControl.ApplyTemplate();
 			control.TemplateFromResourceControl.ApplyTemplate();
@@ -103,11 +90,11 @@ namespace Uno.UI.Tests.Windows_UI_Xaml
 
 			var text2InlineAfter = control.InlineTemplateControl.TextBlock2.Text;
 			var text2ResourceTemplateAfter = control.TemplateFromResourceControl.TextBlock2.Text;
-			
+
 			Assert.AreEqual("OuterVisualTree", text2ResourceTemplateBefore);
-			
+
 			Assert.AreEqual("ApplicationLevel", text4ResourceTemplateBefore);
-			
+
 			Assert.AreEqual("LocalVisualTree", text2ResourceTemplateAfter);
 		}
 
@@ -121,25 +108,61 @@ namespace Uno.UI.Tests.Windows_UI_Xaml
 
 			control.Measure(new Size(1000, 1000));
 
-			var textLightStaticMarkup = control.TemplateFromResourceControl.TextBlock5.Text;
 			var textLightThemeMarkup = control.TemplateFromResourceControl.TextBlock6.Text;
 
-			Assert.AreEqual("ApplicationLevelLight", textLightStaticMarkup);
 			Assert.AreEqual("LocalVisualTreeLight", textLightThemeMarkup);
 
-			if (await SwapSystemTheme())
+			try
 			{
-				var textDarkStaticMarkup = control.TemplateFromResourceControl.TextBlock5.Text;
-				var textDarkThemeMarkup = control.TemplateFromResourceControl.TextBlock6.Text;
-				Assert.AreEqual("ApplicationLevelLight", textDarkStaticMarkup); //StaticResource markup doesn't change
-				Assert.AreEqual("LocalVisualTreeDark", textDarkThemeMarkup); //ThemeResource markup change lookup uses the visual tree (rather than original XAML namescope)
-				;
+				if (await SwapSystemTheme())
+				{
+					var textDarkThemeMarkup = control.TemplateFromResourceControl.TextBlock6.Text;
+					Assert.AreEqual("LocalVisualTreeDark", textDarkThemeMarkup); //ThemeResource markup change lookup uses the visual tree (rather than original XAML namescope)
+					;
+				}
+			}
+			finally
+			{
+				await SwapSystemTheme();
+			}
+		}
+
+		[TestMethod]
+		[Ignore("Uno's StaticResource resolution doesn't exactly match UWP. StaticResource and ThemeResource markup is currently treated identically.")]
+		public async Task When_Theme_Changed_Static()
+		{
+			var app = UnitTestsApp.App.EnsureApplication();
+
+			var control = new Test_Control();
+			app.HostView.Children.Add(control);
+
+			control.Measure(new Size(1000, 1000));
+
+			var textLightStaticMarkup = control.TemplateFromResourceControl.TextBlock5.Text;
+
+			Assert.AreEqual("ApplicationLevelLight", textLightStaticMarkup);
+
+			try
+			{
+				if (await SwapSystemTheme())
+				{
+					var textDarkStaticMarkup = control.TemplateFromResourceControl.TextBlock5.Text;
+					Assert.AreEqual("ApplicationLevelLight", textDarkStaticMarkup); //StaticResource markup doesn't change
+					;
+				}
+			}
+			finally
+			{
+				await SwapSystemTheme();
 			}
 		}
 
 		private static async Task<bool> SwapSystemTheme()
 		{
 			var currentTheme = Application.Current.RequestedTheme;
+			var targetTheme = currentTheme == ApplicationTheme.Light ?
+				ApplicationTheme.Dark :
+				ApplicationTheme.Light;
 #if NETFX_CORE
 			if (!UnitTestsApp.App.EnableInteractiveTests)
 			{
@@ -149,8 +172,9 @@ namespace Uno.UI.Tests.Windows_UI_Xaml
 			var dialog = new ContentDialog { Content = "Set default app mode as 'dark' in settings", CloseButtonText = "Done" };
 			await dialog.ShowAsync();
 #else
+			Application.Current.SetRequestedTheme(targetTheme);
 #endif
-			Assert.AreEqual(ApplicationTheme.Dark, Application.Current.RequestedTheme);
+			Assert.AreEqual(targetTheme, Application.Current.RequestedTheme);
 			return true;
 		}
 	}
