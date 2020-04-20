@@ -1,33 +1,56 @@
-# Embedding Existing Javascript Components Into Uno-WASM
+# Embedding Existing JavaScript Components Into Uno-WASM
 
-Uno fully embraces HTML5 as its display backend on its WASM target. As a result, it's possible to integrate with almost any existing JavaScript library to extend the behavior of an app.
+Uno fully embraces HTML5 as its display backend when targeting WebAssemble (WASM). As a result, it's possible to integrate with almost any existing JavaScript library to extend the behavior of an app.
 
 This article will first review how Uno interoperates with HTML5, followed by a fully-worked example integration of a simple JavaScript-based syntax highlighter in an Uno project. In a future article we will go further and deeper into the .NET/JavaScript interop.
 
-# Uno Wasm Bootstrap - where it starts
+# Uno "Wasm" Bootstrapper - where it starts
 
-Behind a Uno-Wasm project, there's a component called [`Uno.Wasm.Bootstrap`](https://github.com/unoplatform/Uno.Wasm.Bootstrap). It contains the tooling required to build, package, deploy and run a _.NET_ project in a web browser using _WebAssembly_. It's automatically included in any Uno application created from the templates.
+Behind a Uno-Wasm project, there's a component called [`Uno.Wasm.Bootstrap`](https://github.com/unoplatform/Uno.Wasm.Bootstrap). It contains the tooling required to build, package, deploy and run a _.NET_ project in a web browser using WebAssembly. It's automatically included in the WASM head of an Uno app.
 
 ## Embedding assets
 
-In the HTML world, everything running in the browser are assets that must be downloaded from a server. To integrate existing JavaScript frameworks, you can either download those directly from the Internet (usually from a CDN service) or embed them with your app.
+In the HTML world, everything running in the browser are assets that must be downloaded from a server. To integrate existing JavaScript frameworks, you can either download those from another location on the Internet (usually from a CDN service) or embed them with your app.
 
 The Uno Bootstrapper can automatically embed any asset and deploy them with the app. Some of them (CSS & JavaScript) can also be loaded with the app. Here's how to declare them in a _Uno Wasm_ project:
 
-1. **JavaScript files** should be in `WasmScripts`  folder: they will be copied to output folder and loaded automatically by the bootstrapper when the page loads. **They must be marked with the `EmbeddedResources` build action**.
+1. **JavaScript files** should be in the `WasmScripts`  folder: they will be copied to the output folder and loaded automatically by the bootstrapper when the page loads. **They must be marked with the `EmbeddedResources` build action**:
 
-2. **CSS Style files** should be in the `WasmCSS` folder: they will be copied to output folder and referenced in the _HTML head_ of the application. **They must be marked with the `EmbeddedResources` build action**.
+   ``` xml
+   <!-- .csproj file -->
+   <ItemGroup>
+     <EmbeddedResource Include="WasmCSS\javascriptfile.js" />
+     <EmbeddedResource Include="WasmCSS\**\*.js" /> <!-- globing works too -->    
+   </ItemGroup>
+   ```
 
-3. **Asset files** should be marked with the `Content` build action in the app. The file will be copied to output folder and will preserve the same relative path.
+2. **CSS Style files** should be in the `WasmCSS` folder: they will be copied to the output folder and referenced in the _HTML head_ of the application. **They must be marked with the `EmbeddedResources` build action**.
 
-4. Alternatively, **any kind of asset files** can be placed directly in the `wwwroot` folder as you would do with any standard ASP.NET Core project. They will be deployed with the app, but the application code will have the responsibility to fetch and use them.
+   ``` xml
+   <!-- .csproj file -->
+   <ItemGroup>
+     <EmbeddedResource Include="WasmCSS\stylefile.css" />
+     <EmbeddedResource Include="WasmCSS\**\*.css" /> <!-- globing works too -->    
+   </ItemGroup>
+   ```
 
-   > **Is it an Aspnet Core project?**
-   > No, but it shares a common structure. Some of the deployment features, like the `wwwroot` folder, the VisualStudio integration for running and debugging are reused in a similar way to an ASP.NET Core project. The C# code put in such project will run in the browser, using the .NET runtime. There is no need for a server side component in such a project.
+3. **Asset files** should be marked with the `Content` build action in the app. The file will be copied to the output folder and will preserve the same relative path.
+
+   ``` xml
+   <!-- .csproj file -->
+   <ItemGroup>
+     <Content Include="Assets\image.png" />
+   </ItemGroup>
+   ```
+
+4. Alternatively, **any kind of asset file** can be placed directly in the `wwwroot` folder as you would do with any standard ASP.NET Core project. They will be deployed with the app, but the application code is responsible for fetching and using them.
+
+   > **Is it an ASP.NET Core "web" project?**
+   > No, but it shares a common structure. Some of the deployment features, like the `wwwroot` folder, and the Visual Studio integration for running/debugging are reused in a similar way to an ASP.NET Core project. The C# code put in the project will run in the browser, using the .NET runtime. There is no need for a server side component in Uno-Wasm projects.
 
 ## Uno-Wasm controls are actually HTML5 elements
 
-The [philosophy of Uno](https://platform.uno/docs/articles/concepts/overview/philosophy-of-uno.html) is to rely on native platforms where it makes sense. In the context of a browser, that's the HTML5 DOM. It means each time you're creating an instance of a class deriving from `UIElement`, you're actually creating a HTML element.
+The [philosophy of Uno](https://platform.uno/docs/articles/concepts/overview/philosophy-of-uno.html) is to rely on native platforms where it makes sense. In the context of a browser, that's the HTML5 DOM. This means that each time is created, a class deriving from `UIElement` is creating a corresponding HTML element.
 
 That also means that it is possible to control how this element is created.  By default it is a `<div>`, but it can be changed in the constructor by providing the `htmlTag` parameter to the one required. For example:
 
@@ -38,11 +61,11 @@ public MyControl() : base("input") // Will create an "input" HTML element
 public MyControl() : base(htmlTag: "span") // Will create a "span" HTML element
 ```
 
-Once created, it's possible to interact directly with this element by calling helper methods supplied by Uno on base classes. Obviously those methods are only available when targeting the _Wasm_ platform. (You can use [conditional code](https://platform.uno/docs/articles/platform-specific-csharp.html) to use these methods in a multi-platform project.)
+Once created, it is possible to interact directly with this element by calling helper methods available in Uno. Note that those methods are only available when targeting the _Wasm_ platform. It is possible to use [conditional code](https://platform.uno/docs/articles/platform-specific-csharp.html) to use these methods in a multi-platform project.
 
 Here is a list of helper methods used to facilitate the integration with the HTML DOM:
 
-* The method `base.SetStyle()` can be used to set a CSS Style on the html element. Example:
+* The method `base.SetStyle()` can be used to set a CSS Style on the HTML element. Example:
 
   ``` csharp
   // Setting only one CSS style
@@ -81,10 +104,10 @@ Here is a list of helper methods used to facilitate the integration with the HTM
   SetHtmlContent("<h2>Welcome to Uno Platform!</h2>");
   ```
 
-  > Note: don't use this unless your control doesn't include any managed children. Doing so can result in inconsistent runtime errors.
+  > Note: should not be used when there's children "managed" controls: doing so can result in inconsistent runtime errors because of desynchronized visual tree.
 
-* Finally, it is possible to invoke an arbitrary piece of JavaScript code by using the static method `WebAssembleRuntime.InvokeJS()`. The script is directly executed in the context of the browser, giving the ability to perform anything that Javascript can do. It is possible to use the `HtmlId` property of the element to locate it in JavaScript code.
-  If the control has been loaded (after the `Loaded` event has been raised), it will be available directly by calling `document.getElementById()`. But it's also possible to access it before that by using the  `Uno.UI.WindowManager.current.getView(<HtmlId>)` function in JavaScript.
+* Finally, it is possible to invoke an arbitrary JavaScript code by using the static method `WebAssembleRuntime.InvokeJS()`. The script is directly executed in the context of the browser, giving the ability to perform anything that JavaScript can do. The `HtmlId` property of the element can be used to locate it in JavaScript code.
+  If the control has been loaded (after the `Loaded` routed event has been raised), it will be available immediatly by calling `document.getElementById()`. But it is also possible to access it before that by using the  `Uno.UI.WindowManager.current.getView(<HtmlId>)` function in JavaScript.
 
 To illustrate how it is possible to use this in a real application, let's create one to integrate a pretty simple Syntax Highlighter named [`PrismJS`](https://prismjs.com/).
 
@@ -92,11 +115,11 @@ To illustrate how it is possible to use this in a real application, let's create
 
 ## 0. Before starting
 
-📝 To reproduce the code in this article, you must [prepare your development environment using our Getting Started article](https://platform.uno/docs/articles/get-started.html).
+📝 To reproduce the code in this article, you must [prepare development environment using Uno's _Getting Started_ article](https://platform.uno/docs/articles/get-started.html).
 
 ## 1. Create the projects
 
-🎯 This section is very similar to the [_Getting Started_ tutorial in the official documentation](https://platform.uno/docs/articles/getting-started-tutorial-1.html).
+🎯 This section is very similar to the [Creating an app - Tutorial](https://platform.uno/docs/articles/getting-started-tutorial-1.html) in the official documentation.
 
 1. Start **Visual Studio 2019**
 2. Click `Create a new project`
@@ -112,9 +135,12 @@ To illustrate how it is possible to use this in a real application, let's create
 7. Right-click on the solution and pick `Manage NuGet Packages for Solution...`
    ![image-20200325114155796](image-20200325114155796.png)
 8. Update to latest version of `Uno` dependencies. **DO NOT UPDATE THE `Microsoft.Extensions.Logging` dependencies** to latest versions.
+
+   > This step of upgrading is not absolutely required, but it's a good practice to start a project with the latest version of the library.
 9. Press `CTRL-F5`. App should compile and start a browser session showing this:
    ![image-20200325114609689](image-20200325114609689.png)
-   Note: if it is the first time you're using the Uno platform, it could take some times to download the latest .NET for WebAssembly SDK into a temporary folder.
+   
+   > Note: when compiling using Uno platform the first time, it could take some time to download the latest .NET for WebAssembly SDK into a temporary folder. 
 
 ## 2. Create a control in managed code
 
@@ -239,7 +265,7 @@ To illustrate how it is possible to use this in a real application, let's create
 
 ## 3. Add JavaScript & CSS files
 
-🎯 In this section, PrismJS files are download from its website and placed as assets in the app.
+🎯 In this section, PrismJS files are downloaded from their website and placed as assets in the app.
 
 1. Go to this link: https://prismjs.com/download.html
 
@@ -247,11 +273,11 @@ To illustrate how it is possible to use this in a real application, let's create
 
 3. Press the `DOWNLOAD JS` button and put the `prism.js` file in the `WasmScripts` folder of the `.Wasm` project.
 
-   > Putting the `.js` file in this folder will instruct _Uno Wasm Bootstrap_ to automatically load the JavaScript file during startup.
+   > Putting the `.js` file in this folder will instruct the Uno Wasm Bootstrapper to automatically load the JavaScript file during startup.
 
 4. Press the `DOWNLOAD CSS` button and put the `prism.css` file in the `WasmCSS` folder of the `.Wasm` project.
 
-   > Putting the `.css` file in this folder will instruct _Uno Wasm Bootstrap_ to automatically inject a `<link>` html instruction in the resulting `index.html` file to load it with the browser.
+   > Putting the `.css` file in this folder will instruct the Uno Wasm Bootstrapper to automatically inject a `<link>` HTML instruction in the resulting `index.html` file to load it with the browser.
 
 5. Right-click on the `.Wasm` project node in the Solution Explorer, and pick `Edit Project File` (it can also work by just selecting the project, if the `Preview Selected Item` option is activated).
 
@@ -266,7 +292,7 @@ To illustrate how it is possible to use this in a real application, let's create
    </ItemGroup>
    ```
 
-   > For _Uno Wasm Bootstrap_ to take those files automatically and load them with the application, they have to be put as embedded resources. A future version of Uno may remove this requirement.
+   > For the Uno Wasm Bootstrapper to take those files automatically and load them with the application, they have to be put as embedded resources. A future version of Uno may remove this requirement.
 
 7. Compile & run
 
@@ -362,7 +388,7 @@ To illustrate how it is possible to use this in a real application, let's create
 
 ## 🔬 Going further
 
-This sample is a very simple integration as there is no _callback_ from HTML to managed code and _PrismJS_ is a self-contained framework (it does not download any other javascript dependencies).
+This sample is a very simple integration as there is no _callback_ from HTML to managed code and _PrismJS_ is a self-contained framework (it does not download any other javaScript dependencies).
 
 Some additional improvements can be done to make the code more production ready:
 
@@ -380,11 +406,11 @@ Let's create an application illustrating how to use this feature.
 
 # Sample 2 - Integration of Flatpickr
 
-📝 [Flatpickr](https://flatpickr.js.org/) is a lightweight, self-contained date and time picker. It's an easy way to explore how a JavaScript can call back to the managed application code. In this case, this will be used to report when the picker is opened and a date and time was picked.
+📝 [Flatpickr](https://flatpickr.js.org/) is a lightweight, self-contained date and time picker. It is an easy way to explore how JavaScript-side code can call back to the managed application using a `CustomEvent`. In this case, this will be used to report when the picker is opened and a date and time was picked.
 
-## 1. Create the solution in VisualStudio
+## 1. Create the solution in Visual Studio
 
-📝 This part is very short because it is similar to previous article:
+📝 This part is very short because it is similar to the previous article:
 
 1. Create a `Cross-Platform App (Uno Platform)` project and name it `FlatpickrDemo`.
 2. Remove `.Droid`, `.iOS` & `.UWP` projects from solution.
@@ -392,11 +418,11 @@ Let's create an application illustrating how to use this feature.
 
 ## 2. Inject Flatpickr from CDN
 
-🎯 This section is using a CDN to get _Flatpickr_ instead of hosting the javascript directly in the application. It is not always the best solution as it creates a dependency on the Internet availability. Any change made server-side could break the application.
+🎯 This section is using a CDN to get Flatpickr instead of hosting the JavaScript directly in the application. It is not always the best solution as it creates a dependency on the Internet availability. Any change made server-side could break the application.
 
-An easy way to achieve this is to add _JavaScript_ code to load the CSS file directly from the CDN. The _JavaScript_ portion of _Flatpickr_ will be lazy-loaded with the control later.
+An easy way to achieve this is to add JavaScript code to load the CSS file directly from the CDN. The JavaScript portion of Flatpickr will be lazy-loaded with the control later.
 
-1. Create a new _JavaScript_ `flatpickrLoader.js` in the `WasmScripts` folder of the `.Shared` project:
+1. Create a new _JavaScript_ file `flatpickrLoader.js` in the `WasmScripts` folder of the `.Shared` project:
 
    ``` javascript
    (function () {
@@ -410,7 +436,7 @@ An easy way to achieve this is to add _JavaScript_ code to load the CSS file dir
 })();
    ```
    
-   This will load the _Flatpickr_ assets directly from CDN. You can also download assets and put them in the `WasmScripts` and `WasmCSS` folder, that this will be enough for the demo here.
+   This will load the Flatpickr assets directly from CDN.
    
 2. Set the file as `Embedded Resource`:
 
@@ -523,7 +549,7 @@ An easy way to achieve this is to add _JavaScript_ code to load the CSS file dir
 3. After pressing CTRL-F5, after clicking on the `<input>` rectangle, this should appear:
    ![image-20200415144159362](image-20200415144159362.png)
 
-📝 Almost there, still nedd to _call back_ to application.
+📝 Almost there, still need to _call back_ to the managed code portion of the application.
 
 ## 4. Add a way to call managed code from JavaScript
 
@@ -562,7 +588,7 @@ An easy way to achieve this is to add _JavaScript_ code to load the CSS file dir
    }
    ```
 
-3. Change the initialization of `Flatpickr` in injected JavaScript to raise events. Change the implementation of the `OnLoaded` method for this instead:
+3. Change the initialization of `Flatpickr` in injected JavaScript to raise events. Change the implementation of the `OnLoaded` method to this instead:
 
    ``` csharp
    private void OnLoaded(object sender, RoutedEventArgs e)
@@ -581,7 +607,7 @@ An easy way to achieve this is to add _JavaScript_ code to load the CSS file dir
                        onClose: () => element.dispatchEvent(new CustomEvent(""OpenedStateChanged"", {{detail: ""closed""}}))
                    }};
    
-               // Instanciate Flatpickr on the element
+               // Instantiate Flatpickr on the element
                f(element, options);
            }});";
    
@@ -594,12 +620,12 @@ An easy way to achieve this is to add _JavaScript_ code to load the CSS file dir
 
 ## 🔬 Going further
 
-This article illustrates how to integrate external assets (javascript and css files) and how to leverage JavaScript's `CustomEvent` in an Uno application.
+This article illustrates how to integrate external assets (JavaScript and css files) and how to leverage JavaScript's `CustomEvent` in an Uno application.
 
-More steps could be done to make the code more production ready:
+More steps could be done to make the code production ready:
 
-* **Make the control multi-platform**. Many DateTime pickers exists on all platforms. It should be easy on other platforms to connect the same control to another greate Date picker native to the platform - no need to embed a WebView for this on other platforms.
-* **Create script files instead of generating dynamic javascript**. As in previous article, this would have the advantage of improving performance and increase the ability to debug it.
+* **Make the control multi-platform**. Many DateTime pickers exist on all platforms. It should be easy on other platforms to connect the same control to another great Date picker native to the platform - no need to embed a WebView for this on other platforms.
+* **Create script files instead of generating dynamic JavaScript**. As in previous article, this would have the advantage of improving performance and increase the ability to debug it.
 * **Support more Flatpickr features**. There's a [lot of features in Flatpickr](https://flatpickr.js.org/examples/) you can leverage to make a perfect versatile control.
 
 
@@ -618,7 +644,7 @@ More steps could be done to make the code more production ready:
 
 ### TypeScript
 
-If you prefer to use TypeScript instead of Javascript, you can set it up to output files in the `WasmScripts` folder. Many projects are doing this, the technique won't be covered in this article.
+If you prefer to use TypeScript instead of JavaScript, you can set it up to output files in the `WasmScripts` folder. Many projects are doing this, the technique won't be covered in this article.
 
 Here's some projects using TypeScript:
 
