@@ -122,24 +122,33 @@ To illustrate how it is possible to use this in a real application, let's create
 🎯 This section is very similar to the [Creating an app - Tutorial](https://platform.uno/docs/articles/getting-started-tutorial-1.html) in the official documentation.
 
 1. Start **Visual Studio 2019**
+
 2. Click `Create a new project`
    ![image-20200325113112235](image-20200325113112235.png)
+   
 3. **Search for "Uno"** and pick `Cross-Platform App (Uno Platform)`.
    ![image-20200325113532758](image-20200325113532758.png)
    Select it and click `Next`.
-4. Give a project name and folder as you wish. It will be named `PrismJsDemo` here.
-5. Click `Create` button.
-6. Delete the `.Droid`, `.iOS` and `.UWP` projects.
    
-   > Note: it is possible to build multi-platforms controls, but it's the goal of another article. Removing them will avoid misleading compilation errors for now.
-7. Right-click on the solution and pick `Manage NuGet Packages for Solution...`
+4. Give a project name and folder as you wish. It will be named `PrismJsDemo` here.
+
+5. Click `Create` button.
+
+6. Right-click on the solution and pick `Manage NuGet Packages for Solution...`
    ![image-20200325114155796](image-20200325114155796.png)
+   
 8. Update to latest version of `Uno` dependencies. **DO NOT UPDATE THE `Microsoft.Extensions.Logging` dependencies** to latest versions.
 
    > This step of upgrading is not absolutely required, but it's a good practice to start a project with the latest version of the library.
+   
+9. Right-click on the `.Wasm` project in the _Solution Explorer_ and pick `Set as Startup Project`.
+   ![image-20200420123443823](image-20200420123443823.png)
+   
+   > Note: this article will concentrate on build Wasm-only code, so it won't compile on other platforms' projects.
+   
 9. Press `CTRL-F5`. App should compile and start a browser session showing this:
    ![image-20200325114609689](image-20200325114609689.png)
-   
+
    > Note: when compiling using Uno platform the first time, it could take some time to download the latest .NET for WebAssembly SDK into a temporary folder. 
 
 ## 2. Create a control in managed code
@@ -413,8 +422,9 @@ Let's create an application illustrating how to use this feature.
 📝 This part is very short because it is similar to the previous article:
 
 1. Create a `Cross-Platform App (Uno Platform)` project and name it `FlatpickrDemo`.
-2. Remove `.Droid`, `.iOS` & `.UWP` projects from solution.
+2. Right-click on the `.Wasm` project in the _Solution Explorer_ and pick `Set as Startup Project`.
 3. Update to latest _stable_ version of `Uno.*` dependencies.
+4. Compile & Run to make sure everything works.
 
 ## 2. Inject Flatpickr from CDN
 
