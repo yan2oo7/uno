@@ -4,9 +4,9 @@ Uno fully embraces HTML5 as its display backend when targeting WebAssemble (WASM
 
 This article will first review how Uno interoperates with HTML5, followed by a fully-worked example integration of a simple JavaScript-based syntax highlighter in an Uno project. In a future article we will go further and deeper into the .NET/JavaScript interop.
 
-# Uno "Wasm" Bootstrapper - where it starts
+# Uno "Wasm" Bootstrapper - it starts here
 
-Behind a Uno-Wasm project, there's a component called [`Uno.Wasm.Bootstrap`](https://github.com/unoplatform/Uno.Wasm.Bootstrap). It contains the tooling required to build, package, deploy and run a _.NET_ project in a web browser using WebAssembly. It's automatically included in the WASM head of an Uno app.
+Behind a Uno-Wasm project, there's a package called [`Uno.Wasm.Bootstrap`](https://github.com/unoplatform/Uno.Wasm.Bootstrap). It contains the tooling required to build, package, deploy and run a _.NET_ project in a web browser using WebAssembly. It's automatically included in the WASM head of an Uno app.
 
 ## Embedding assets
 
@@ -19,8 +19,8 @@ The Uno Bootstrapper can automatically embed any asset and deploy them with the 
    ``` xml
    <!-- .csproj file -->
    <ItemGroup>
-     <EmbeddedResource Include="WasmCSS\javascriptfile.js" />
-     <EmbeddedResource Include="WasmCSS\**\*.js" /> <!-- globing works too -->    
+     <EmbeddedResource Include="WasmScripts\javascriptfile.js" />
+     <EmbeddedResource Include="WasmScripts\**\*.js" /> <!-- globing works too -->    
    </ItemGroup>
    ```
 
@@ -72,7 +72,7 @@ Here is a list of helper methods used to facilitate the integration with the HTM
   SetStyle("text-shadow", "2px 2px red");
   
   // Setting many CSS styles at once using C# tuples
-  SetStyle(("text-shadow", "2px 2px blue"), ("color", "var(--app-bg-color)"));
+  SetStyle(("text-shadow", "2px 2px blue"), ("color", "var(--app-fg-color1)"));
   ```
 
 * The method `base.ResetStyle()` can be used to set CSS styles to their default values. Example:
