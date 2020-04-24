@@ -5,19 +5,27 @@ using System.Linq;
 using Uno.Extensions;
 using Android.Views;
 using System;
+using Microsoft.UI.Xaml.Controls;
 using Uno.UI.Controls;
 using Uno.UI;
 
 namespace Windows.UI.Xaml.Controls
 {
-	public class UIElementCollection : BatchCollection<View>, IList<View>, IEnumerable<View>
+	public partial class UIElementCollection : BatchCollection<View>, IList<View>, IEnumerable<View>
     {
-        private readonly BindableView _owner;	
+		private IList<UIElement> _trullyUIElementCollection;
+		/// <summary>
+		/// This is a temporary patch to work around the invalid enumeration type of the UIElementCollection
+		/// </summary>
+		/// <returns></returns>
+		internal IList<UIElement> AsUIElementList() => _trullyUIElementCollection ??= ListAdapter.ChangeType<View, UIElement>(this);
 
-        public UIElementCollection(BindableView owner) : base(owner)
-        { 
-            _owner = owner;
-        }
+		private readonly BindableView _owner;
+
+		public UIElementCollection(BindableView owner) : base(owner)
+		{
+			_owner = owner;
+		}
 
 		protected override int IndexOfCore(View item)
 		{

@@ -12,9 +12,16 @@ namespace Windows.UI.Xaml.Controls
 {
 	public partial class UIElementCollection :  BatchCollection<UIView>, IList<UIView>, IEnumerable<UIView>
 	{
-        private readonly BindableUIView _owner;
+		private IList<UIElement> _trullyUIElementCollection;
+		/// <summary>
+		/// This is a temporary patch to work around the invalid enumeration type of the UIElementCollection
+		/// </summary>
+		/// <returns></returns>
+		internal IList<UIElement> AsUIElementList() => _trullyUIElementCollection ??= ListAdapter.ChangeType<UIView, UIElement>(this);
 
-        public UIElementCollection(BindableUIView owner) : base(owner)
+		private readonly BindableUIView _owner;
+
+		public UIElementCollection(BindableUIView owner) : base(owner)
 		{
 			_owner = owner;
 		}

@@ -9,10 +9,16 @@ namespace Windows.UI.Xaml.Controls
 {
 	public partial class UIElementCollection : BatchCollection<UIElement>
 	{
-        private List<UIElement> _elements ;
+		/// <summary>
+		/// This is a temporary patch to work around the invalid enumeration type of the UIElementCollection
+		/// </summary>
+		/// <returns></returns>
+		internal IList<UIElement> AsUIElementList() => this;
 
-        public UIElementCollection(FrameworkElement view) : base(view)
-        {
+		private List<UIElement> _elements ;
+
+		public UIElementCollection(FrameworkElement view) : base(view)
+		{
 			_elements = view._children;
 		}
 

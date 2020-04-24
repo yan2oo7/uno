@@ -11,9 +11,16 @@ namespace Windows.UI.Xaml.Controls
 {
 	public partial class UIElementCollection :  BatchCollection<NSView>, IList<NSView>, IEnumerable<NSView>
 	{
-        private readonly BindableNSView _owner;
+		private IList<UIElement> _trullyUIElementCollection;
+		/// <summary>
+		/// This is a temporary patch to work around the invalid enumeration type of the UIElementCollection
+		/// </summary>
+		/// <returns></returns>
+		internal IList<UIElement> AsUIElementList() => _trullyUIElementCollection ??= ListAdapter.ChangeType<NSView, UIElement>(this);
 
-        public UIElementCollection(BindableNSView owner) : base(owner)
+		private readonly BindableNSView _owner;
+
+		public UIElementCollection(BindableNSView owner) : base(owner)
 		{
 			_owner = owner;
 		}
