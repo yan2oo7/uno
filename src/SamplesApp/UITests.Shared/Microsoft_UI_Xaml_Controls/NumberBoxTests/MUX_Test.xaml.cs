@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
-using Uno.UI.Samples.Controls;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -14,6 +13,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Windows.Globalization.NumberFormatting;
+using Uno.UI.Samples.Controls;
 
 // Condition to be removed when UWP will be updated to 18362+
 #if HAS_UNO
@@ -24,7 +24,7 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace UITests.Shared.Microsoft_UI_Xaml_Controls.NumberBoxTests
 {
-	[SampleControlInfo("NumberBox", "MUX_Test")]
+	[Sample("NumberBox", "WinUI", Name="MUX_Test")]
 	public sealed partial class MUX_Test : UserControl
     {
         public MUX_Test()
