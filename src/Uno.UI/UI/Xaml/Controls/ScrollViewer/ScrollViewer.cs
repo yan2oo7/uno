@@ -552,21 +552,14 @@ namespace Windows.UI.Xaml.Controls
 			);
 		#endregion
 
+		[global::Uno.NotImplemented]
+		public UIElement CurrentAnchor => null;
+
 		/// <summary>
 		/// Cached value of <see cref="Uno.UI.Xaml.Controls.ScrollViewer.UpdatesModeProperty"/>,
 		/// in order to not access the DP on each scroll (perf considerations)
 		/// </summary>
 		internal Uno.UI.Xaml.Controls.ScrollViewerUpdatesMode UpdatesMode { get; set; }
-
-		private static void OnGenericPropertyChanged(object dependencyObject, DependencyPropertyChangedEventArgs args)
-		{
-			var view = dependencyObject as View;
-
-			if (view != null)
-			{
-				view.InvalidateMeasure();
-			}
-		}
 
 		protected override Foundation.Size MeasureOverride(Foundation.Size availableSize)
 		{
