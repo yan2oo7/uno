@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using Uno.Disposables;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -65,6 +64,8 @@ namespace Windows.UI.Xaml.Controls
 
 		public ScrollViewer()
 		{
+			UIElement.RegisterAsScrollPort(this);
+
 			UpdatesMode = Uno.UI.Xaml.Controls.ScrollViewer.GetUpdatesMode(this);
 			InitializePartial();
 		}
@@ -786,6 +787,10 @@ namespace Windows.UI.Xaml.Controls
 
 			HorizontalOffset = _pendingHorizontalOffset;
 			VerticalOffset = _pendingVerticalOffset;
+
+			// Effective viewport support
+			ScrollOffsets = new Point(_pendingHorizontalOffset, _pendingVerticalOffset);
+			InvalidateViewport();
 
 			ViewChanged?.Invoke(this, new ScrollViewerViewChangedEventArgs { IsIntermediate = isIntermediate });
 		}
