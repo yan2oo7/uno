@@ -153,14 +153,14 @@ namespace Windows.UI.Xaml
 				e.Style = Xaml.Style.DefaultStyleForType(e.GetType());
 			}
 
+#if __IOS__
 			if (e is UIElement uiElement)
 			{
-#if __IOS__
 				uiElement.ClipsToBounds = false;
 				uiElement.Layer.MasksToBounds = false;
 				uiElement.Layer.MaskedCorners = (CoreAnimation.CACornerMask)0;
-#endif
 			}
+#endif
 
 #if __ANDROID__
 			if (e is View view)
@@ -173,6 +173,11 @@ namespace Windows.UI.Xaml
 				view.ImportantForAccessibility = Android.Views.ImportantForAccessibility.Yes;
 			}
 #endif
+
+			if (e is IFrameworkElement_EffectiveViewport evp)
+			{
+				evp.InitializeEffectiveViewport();
+			}
 		}
 
 		/// <summary>
