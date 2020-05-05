@@ -1,11 +1,29 @@
-﻿<Page
+﻿<controls1:Page
 	x:Class="SamplesApp.MainPage"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:controls="using:Uno.UI.Samples.Controls"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:mux="clr-namespace:Microsoft.UI.Xaml.Controls;assembly=Uno.UI"
+	xmlns:samplesApp="clr-namespace:SamplesApp"
+	xmlns:controls1="clr-namespace:Windows.UI.Xaml.Controls;assembly=Uno.UI"
 	mc:Ignorable="d">
 
-	<controls:SampleChooserControl x:Name="sampleControl" />
-</Page>
+	<Grid>
+		<ScrollViewer>
+			<mux:ItemsRepeater x:Name="SUT">
+				<mux:ItemsRepeater.ItemTemplate>
+					<DataTemplate>
+						<Border>
+							<samplesApp:MyControl DataContext="{Binding}"/>
+						</Border>
+					</DataTemplate>
+				</mux:ItemsRepeater.ItemTemplate>
+			</mux:ItemsRepeater>
+		</ScrollViewer>
+		<Button Click="SetSource" Content="Set source" HorizontalAlignment="Center" VerticalAlignment="Center" />
+	</Grid>
+
+	<!--<controls:SampleChooserControl x:Name="sampleControl" />-->
+</controls1:Page>

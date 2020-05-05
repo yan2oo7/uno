@@ -1,4 +1,5 @@
-﻿using SampleControl.Presentation;
+﻿using System.Linq;
+using SampleControl.Presentation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -10,8 +11,12 @@ namespace SamplesApp
 		public MainPage()
 		{
 			this.InitializeComponent();
+		}
 
-			sampleControl.DataContext = new SampleChooserViewModel();
+		private void SetSource(object sender, RoutedEventArgs e)
+		{
+			((FrameworkElement)sender).Visibility = Visibility.Collapsed;
+			SUT.ItemsSource = Enumerable.Range(0, 5000);
 		}
 	}
 }
