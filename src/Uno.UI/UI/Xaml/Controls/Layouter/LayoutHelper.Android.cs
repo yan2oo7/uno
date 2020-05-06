@@ -22,6 +22,7 @@ namespace Windows.UI.Xaml.Controls
 	/// </summary>
 	internal class LayouterHelper
 	{
+#error
 		internal static readonly UnsafeWeakAttachedDictionary<View, string> LayoutProperties = new UnsafeWeakAttachedDictionary<View, string>();
 
 		internal static readonly FastInvokerBuilder.FastInvokerHandler SetMeasuredDimensions = GetSetMeasuredDimensionMethod();
