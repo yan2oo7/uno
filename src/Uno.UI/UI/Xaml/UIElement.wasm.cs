@@ -178,6 +178,7 @@ namespace Windows.UI.Xaml
 			}
 
 			Uno.UI.Xaml.WindowManagerInterop.ArrangeElement(HtmlId, rect, clipToBounds, clipRect);
+			OnViewportUpdated(clipRect ?? Rect.Empty);
 
 #if DEBUG
 			var count = ++_arrangeCount;
