@@ -8,13 +8,6 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Markup;
 using Uno.UI.DataBinding;
-#if XAMARIN_IOS
-using View = UIKit.UIView;
-#elif XAMARIN_ANDROID
-using View = Android.Views.View;
-#else
-using View = Windows.UI.Xaml.UIElement;
-#endif
 
 namespace Windows.UI.Xaml.Controls
 {
@@ -71,16 +64,16 @@ namespace Windows.UI.Xaml.Controls
 
 		#region Content DependencyProperty
 
-		public View Content
+		public UIElement Content
 		{
-			get { return (View)this.GetValue(ContentProperty); }
+			get { return (UIElement)this.GetValue(ContentProperty); }
 			set { this.SetValue(ContentProperty, value); }
 		}
 
 		public static readonly DependencyProperty ContentProperty =
 			DependencyProperty.Register(
 				"Content",
-				typeof(View),
+				typeof(UIElement),
 				typeof(SplitView),
 				new PropertyMetadata(
 					null,
@@ -97,16 +90,16 @@ namespace Windows.UI.Xaml.Controls
 
 		#region Pane DependencyProperty
 
-		public View Pane
+		public UIElement Pane
 		{
-			get { return (View)this.GetValue(PaneProperty); }
+			get { return (UIElement)this.GetValue(PaneProperty); }
 			set { this.SetValue(PaneProperty, value); }
 		}
 
 		public static readonly DependencyProperty PaneProperty =
 			DependencyProperty.Register(
 				"Pane",
-				typeof(View),
+				typeof(UIElement),
 				typeof(SplitView),
 				new PropertyMetadata(
 					null,
