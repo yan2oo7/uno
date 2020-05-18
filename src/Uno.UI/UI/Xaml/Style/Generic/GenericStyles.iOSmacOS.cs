@@ -90,7 +90,7 @@ namespace Windows.UI.Xaml
 								Background = SolidColorBrushHelper.White,
 								Margin = new Thickness(5),
 								CornerRadius = 10,
-								Child = new UIDatePicker()
+								Child = VisualTreeHelper.AdaptNative(new UIDatePicker())
 							};
 						})
 					)
