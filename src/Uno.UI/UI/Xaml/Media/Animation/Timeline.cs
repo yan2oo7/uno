@@ -168,7 +168,7 @@ namespace Windows.UI.Xaml.Media.Animation
 		{
 			if (GetVisualParent() is FrameworkElement fe)
 			{
-				return fe.FindName(Storyboard.GetTargetName(this));
+				return fe.FindName(Storyboard.GetTargetName(this)) as DependencyObject;
 			}
 			else
 			{

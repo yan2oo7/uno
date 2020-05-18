@@ -87,7 +87,7 @@ namespace Windows.UI.Xaml
 		}
 		#endregion
 
-		public IFrameworkElement FindName(string name)
+		public object FindName(string name)
 			=> IFrameworkElementHelper.FindName(this, GetChildren(), name);
 
 
