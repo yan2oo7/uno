@@ -7,7 +7,7 @@ namespace Windows.UI.Xaml.Controls
 	#endif
 	public  partial class ProgressRing 
 	{
-#if false || false || NET461 || false || false
+#if false || false || false || false || false
 		[global::Uno.NotImplemented]
 		public  bool IsActive
 		{
@@ -31,7 +31,7 @@ namespace Windows.UI.Xaml.Controls
 			}
 		}
 #endif
-#if false || false || NET461 || false || false
+#if false || false || false || false || false
 		[global::Uno.NotImplemented]
 		public static global::Windows.UI.Xaml.DependencyProperty IsActiveProperty { get; } = 
 		Windows.UI.Xaml.DependencyProperty.Register(
@@ -39,7 +39,7 @@ namespace Windows.UI.Xaml.Controls
 			typeof(global::Windows.UI.Xaml.Controls.ProgressRing), 
 			new FrameworkPropertyMetadata(default(bool)));
 #endif
-#if false || false || NET461 || false || false
+#if false || false || false || false || false
 		[global::Uno.NotImplemented]
 		public ProgressRing() : base()
 		{
