@@ -7,18 +7,21 @@ using View = Windows.UI.Xaml.UIElement;
 
 namespace Windows.UI.Xaml.Controls
 {
-	public partial class UIElementCollection : BatchCollection<UIElement>
+	public partial class UIElementCollection
 	{
-        private List<UIElement> _elements ;
+		private readonly List<UIElement> _elements;
 
-        public UIElementCollection(FrameworkElement view) : base(view)
-        {
+		private readonly UIElement _owner;
+
+		public UIElementCollection(FrameworkElement view)
+		{
 			_elements = view._children;
+			_owner = view;
 		}
 
-		protected override void AddCore(View item) => _elements.Add(item);
+		private void AddCore(View item) => _elements.Add(item);
 
-		protected override IEnumerable<View> ClearCore()
+		private IEnumerable<View> ClearCore()
 		{
 			var old = _elements.ToArray();
 			_elements.Clear();
@@ -26,40 +29,40 @@ namespace Windows.UI.Xaml.Controls
 			return old;
 		}
 
-		protected override bool ContainsCore(View item)
+		private bool ContainsCore(View item)
 		{
 			throw new NotImplementedException();
 		}
 
-		protected override void CopyToCore(View[] array, int arrayIndex)
+		private void CopyToCore(View[] array, int arrayIndex)
 		{
 			throw new NotImplementedException();
 		}
 
-		protected override int CountCore() => _elements.Count;
+		private int CountCore() => _elements.Count;
 
-		protected override View GetAtIndexCore(int index) => _elements[index];
+		private View GetAtIndexCore(int index) => _elements[index];
 
-		protected override List<View>.Enumerator GetEnumeratorCore() => _elements.GetEnumerator();
+		public IEnumerator<View> GetEnumerator() => _elements.GetEnumerator();
 
-		protected override int IndexOfCore(View item) => _elements.IndexOf(item);
+		private int IndexOfCore(View item) => _elements.IndexOf(item);
 
-		protected override void InsertCore(int index, View item) => _elements.Insert(index, item);
+		private void InsertCore(int index, View item) => _elements.Insert(index, item);
 
-		protected override void MoveCore(uint oldIndex, uint newIndex)
+		private void MoveCore(uint oldIndex, uint newIndex)
 		{
 			throw new NotImplementedException();
 		}
 
-		protected override View RemoveAtCore(int index)
+		private View RemoveAtCore(int index)
 		{
 			var item = _elements.ElementAtOrDefault(index);
 			_elements.RemoveAt(index);
 			return item;
 		}
 
-		protected override bool RemoveCore(View item) => _elements.Remove(item);
+		private bool RemoveCore(View item) => _elements.Remove(item);
 
-		protected override View SetAtIndexCore(int index, View value) => _elements[index] = value;
+		private View SetAtIndexCore(int index, View value) => _elements[index] = value;
 	}
 }
