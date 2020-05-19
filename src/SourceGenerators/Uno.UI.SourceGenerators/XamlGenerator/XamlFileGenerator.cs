@@ -88,7 +88,7 @@ namespace Uno.UI.SourceGenerators.XamlGenerator
 		private readonly INamedTypeSymbol _contentPresenterSymbol;
 		private readonly INamedTypeSymbol _stringSymbol;
 		private readonly INamedTypeSymbol _objectSymbol;
-		private readonly INamedTypeSymbol _iFrameworkElementSymbol;
+		private readonly INamedTypeSymbol _frameworkElementSymbol;
 		private readonly INamedTypeSymbol _uiElementSymbol;
 		private readonly INamedTypeSymbol _dependencyObjectSymbol;
 		private readonly INamedTypeSymbol _markupExtensionSymbol;
@@ -160,7 +160,7 @@ namespace Uno.UI.SourceGenerators.XamlGenerator
 			_elementStubSymbol = GetType(XamlConstants.Types.ElementStub);
 			_setterSymbol = GetType(XamlConstants.Types.Setter);
 			_contentPresenterSymbol = GetType(XamlConstants.Types.ContentPresenter);
-			_iFrameworkElementSymbol = GetType(XamlConstants.Types.IFrameworkElement);
+			_frameworkElementSymbol = GetType(XamlConstants.Types.FrameworkElement);
 			_uiElementSymbol = GetType(XamlConstants.Types.UIElement);
 			_dependencyObjectSymbol = GetType(XamlConstants.Types.DependencyObject);
 			_markupExtensionSymbol = GetType(XamlConstants.Types.MarkupExtension);
@@ -1732,7 +1732,7 @@ namespace Uno.UI.SourceGenerators.XamlGenerator
 								writer.AppendFormatInvariant("{0}Child = ", setterPrefix);
 
 								var implicitContent = implicitContentChild.Objects.First();
-								using (TryAdaptNative(writer, implicitContent))
+								using (TryAdaptNative(writer, implicitContent, _uiElementSymbol))
 								{
 									BuildChild(writer, implicitContentChild, implicitContent);
 								}
@@ -1786,7 +1786,7 @@ namespace Uno.UI.SourceGenerators.XamlGenerator
 								}
 							}
 						}
-						else
+						else // General case for implicit content
 						{
 							var elementType = FindType(topLevelControl.Type);
 
@@ -1876,7 +1876,7 @@ namespace Uno.UI.SourceGenerators.XamlGenerator
 												.InvariantCultureFormat(contentProperty.Name));
 										}
 									}
-									else
+									else // Content is not a collection
 									{
 										var objectUid = GetObjectUid(topLevelControl);
 										var isLocalized = objectUid != null &&
@@ -1894,7 +1894,11 @@ namespace Uno.UI.SourceGenerators.XamlGenerator
 												throw new InvalidOperationException("The type {0} does not support multiple children.".InvariantCultureFormat(topLevelControl.Type.Name));
 											}
 
-											BuildChild(writer, implicitContentChild, implicitContentChild.Objects.First());
+											var xamlObjectDefinition = implicitContentChild.Objects.First();
+											using (TryAdaptNative(writer, xamlObjectDefinition, contentProperty.Type as INamedTypeSymbol))
+											{
+												BuildChild(writer, implicitContentChild, xamlObjectDefinition);
+											}
 
 											if (isInline)
 											{
@@ -3911,7 +3915,11 @@ namespace Uno.UI.SourceGenerators.XamlGenerator
 								else
 								{
 									writer.AppendFormatInvariant($"{fullValueSetter} = ");
-									BuildChild(writer, member, nonBindingObjects.First());
+									var nonBindingObject = nonBindingObjects.First();
+									using (TryAdaptNative(writer, nonBindingObject, FindPropertyType(member.Member)))
+									{
+										BuildChild(writer, member, nonBindingObject);
+									}
 								}
 
 								writer.AppendLineInvariant(closingPunctuation);
@@ -4517,9 +4525,9 @@ namespace Uno.UI.SourceGenerators.XamlGenerator
 		/// <summary>
 		/// Checks if the element is a native view and, if so, wraps it in a container for addition to the managed visual tree.
 		/// </summary>
-		private IDisposable TryAdaptNative(IIndentedStringBuilder writer, XamlObjectDefinition xamlObjectDefinition)
+		private IDisposable TryAdaptNative(IIndentedStringBuilder writer, XamlObjectDefinition xamlObjectDefinition, INamedTypeSymbol targetType)
 		{
-			if (!IsFrameworkElement(xamlObjectDefinition.Type) && IsNativeView(xamlObjectDefinition.Type))
+			if (IsManagedViewBaseType(targetType) && !IsFrameworkElement(xamlObjectDefinition.Type) && IsNativeView(xamlObjectDefinition.Type))
 			{
 				writer.AppendLineInvariant("global::Windows.UI.Xaml.Media.VisualTreeHelper.AdaptNative(");
 				return new DisposableAction(() => writer.AppendLine(")"));
