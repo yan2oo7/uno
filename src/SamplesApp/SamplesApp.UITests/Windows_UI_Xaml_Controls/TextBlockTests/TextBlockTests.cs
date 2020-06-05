@@ -112,5 +112,27 @@ namespace SamplesApp.UITests.Windows_UI_Xaml_Controls.TextBlockTests
 
 			ImageAssert.AreEqual(before, restored);
 		}
+
+		[Test]
+		[AutoRetry]
+		public void When_FontWeight_Changed()
+		{
+			Run("Uno.UI.Samples.Content.UITests.TextBlockControl.TextBlock_FontWeight_Dynamic");
+
+			var font01 = _app.Marked("font01");
+
+			font01.SetDependencyPropertyValue("FontWeight", "Thin");
+			var rectBefore = _app.Query(_app.Marked("font01")).First().Rect;
+			var widthBefore = rectBefore.Width;
+			var heightBefore = rectBefore.Height;
+
+			font01.SetDependencyPropertyValue("FontWeight", "Heavy");
+			var rectAfter = _app.Query(_app.Marked("font01")).First().Rect;
+			var widthAfter = rectAfter.Width;
+			var heightAfter = rectAfter.Height;
+
+			Assert.IsTrue(widthBefore < widthAfter);
+			Assert.IsTrue(heightBefore == heightAfter);
+		}
 	}
 }
